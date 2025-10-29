@@ -1,0 +1,8 @@
+{
+  "name": "partial-compact",
+  "description": "Compacts the last N messages of a conversation",
+  "version": "1.0.0",
+  "author": {
+    "name": "Kevin Wu Won"
+  }
+}

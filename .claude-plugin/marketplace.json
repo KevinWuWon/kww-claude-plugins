@@ -1,0 +1,13 @@
+{
+  "name": "kww-claude-plugins",
+  "owner": {
+    "name": "Kevin Wu Won"
+  },
+  "plugins": [
+    {
+      "name": "partial-compact",
+      "source": "./partial-compact",
+      "description": "Compacts the last N messages of a conversation"
+    }
+  ]
+}
