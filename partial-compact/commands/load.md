@@ -3,4 +3,4 @@ description: Run this after partial-compact:go and after reverting the conversat
 ---
 1. Read ./PARTIAL_COMPACTION_RESULT.md and treat it as part of the conversation history.
 2. If that file has a Relevant Files section, read the mentioned lines of those files.
-3. Then delete the file.
+3. Delete ./PARTIAL_COMPACTION_RESULT.md
