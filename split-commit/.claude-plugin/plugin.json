@@ -1,0 +1,8 @@
+{
+  "name": "split-commit",
+  "description": "Splits the HEAD commit into a sequence of smaller commits",
+  "version": "1.0.0",
+  "author": {
+    "name": "Kevin Wu Won"
+  }
+}
