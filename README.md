@@ -15,7 +15,8 @@ To use these plugins with Claude Code, type:
 Compacts the last N messages of a conversation to save context while preserving important information.
 
 ### Usage
-1. In a long conversation, type `/partial-compact:go`. It will ask you to select a message to compact back to.
+1. In a long conversation, type `/partial-compact:go`. It will ask you to select a message to 
+   compact back to.
 2. Manually revert the conversation to that point
 3. Type `/partial-compact:load`
 
@@ -25,3 +26,12 @@ Compacts the last N messages of a conversation to save context while preserving 
 - Long debugging sessions where only the final solution matters
 - Any scenario where conversation history has grown too large
 
+## split-commit
+
+Splits the HEAD commit into a sequence of smaller commits for better git history and reviewability.
+
+### Usage
+1. If you have found yourself a huge number of changes, commit them so it is in your HEAD commit.
+2. Type `/split-commit:split-head` and follow the prompts
+3. The plugin will analyze your changes and create a sequence of smaller commits, guaranteeing that
+   the final result is the same code

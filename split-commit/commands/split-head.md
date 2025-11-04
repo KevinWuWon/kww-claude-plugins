@@ -1,3 +1,6 @@
+---
+description: Split the HEAD commit into smaller commits
+---
 Split the HEAD commit into smaller commits using the following process:
 
 1. If there are any uncommitted changes according to `git status`, stash them
