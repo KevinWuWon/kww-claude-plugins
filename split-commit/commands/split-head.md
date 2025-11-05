@@ -4,7 +4,11 @@ description: Split the HEAD commit into smaller commits
 Split the HEAD commit into smaller commits using the following process:
 
 1. If there are any uncommitted changes according to `git status`, stash them
-2. Read the HEAD commit code and description to understand what it does and think hard to come up with a sequence of commits it could be split into. Each commit should be a logical unit of work and the code should work and compile after it. If there is a combination of refactor and implementation, the refactoring should come first.
+2. Read the HEAD commit code and description to understand what it does and think hard to come up with a sequence of commits it could be split into following these steps:
+   a) Make a list of all the distinct logical changes that sum to this commit. eg. "extract function {foo} and refactor code to use it", "implement backend for {bar} and add tests", "implement UI for {bar}".
+   b) Make a dependency graph of which changes depend on which.
+   c) Put the list in dependency order. If it could go either way, prefer to put refactorings first.
+   d) Coalesce adjacent changes in this list that belong together (especially if they touch different files).
 3. Present the sequence of commits to the user for their approval before continuing.
 4. Take note of the currently checked out branch with `git branch --show-current`; let's call this <branch_name>
 5. Run `git checkout HEAD^`
