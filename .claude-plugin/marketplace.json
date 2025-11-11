@@ -5,9 +5,9 @@
   },
   "plugins": [
     {
-      "name": "partial-compact",
-      "source": "./partial-compact",
-      "description": "Compacts the last N messages of a conversation"
+      "name": "better-compact",
+      "source": "./better-compact",
+      "description": "A compaction tool that's better than the built in one. Supports full or tail compaction"
     },
     {
       "name": "split-commit",

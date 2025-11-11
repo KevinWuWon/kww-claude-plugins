@@ -1,11 +1,11 @@
 ---
 description: Compress the last N messages of the conversation history
 ---
-Perform a partial compaction of the recent conversation history by writing a summary to ./PARTIAL_COMPACTION_RESULT.md of the most recent N user/system messages.
+Perform a partial compaction of the recent conversation history by writing a summary to ./BETTER_COMPACT_RESULT.md of the most recent N user/system messages.
 
 Look at the recent user messages and user-invoked slash commands in the message history. Ask the user which message X to compact back to (inclusive). Include some likely options in the AskUserQuestion tool, presented in chronological order. Present these options using the verbatim initial few words or slash command name from the user message.
 
-After you write the summary, instruct the user to revert the conversation (but not the code) to message X and instruct the user to run /partial-compact:load after they have done so. After reverting, you will no longer see any messages from message X onwards; but any code that was changed in the course of the conversation will remain on disk. The summary provided will be appended to the end of the context. So, next time you will see all the messages before the checkpoint, plus the summary of the last part of the conversation. You must make it very clear in the summary, describe what you have done/changed, what you have learned and any other information that may be useful.
+After you write the summary, instruct the user to revert the conversation (but not the code) to message X and instruct the user to run /better-compact:load after they have done so. After reverting, you will no longer see any messages from message X onwards; but any code that was changed in the course of the conversation will remain on disk. The summary provided will be appended to the end of the context. So, next time you will see all the messages before the checkpoint, plus the summary of the last part of the conversation. You must make it very clear in the summary, describe what you have done/changed, what you have learned and any other information that may be useful.
 
 Here are some typical scenarios:
 
@@ -22,7 +22,7 @@ What not to include:
 
 Follow this structure (omit sections that do not apply):
 
-<example-structure filename="PARTIAL_COMPACTION_RESULT.md">
+<example-structure filename="BETTER_COMPACT_RESULT.md">
 # Summary of compacted conversation
 
 The following is a summary of some conversation or work that happened but for which the details have been redacted for the sake of context efficiency.

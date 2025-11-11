@@ -10,15 +10,21 @@ To use these plugins with Claude Code, type:
 /plugin marketplace add KevinWuWon/kww-claude-plugins
 ```
 
-## partial-compact
+## better-compact
 
 Compacts the last N messages of a conversation to save context while preserving important information.
 
 ### Usage
-1. In a long conversation, type `/partial-compact:go`. It will ask you to select a message to 
+For tail compaction:
+1. In a long conversation, type `/better-compact:compact-tail`. It will ask you to select a message to 
    compact back to.
-2. Manually revert the conversation to that point
-3. Type `/partial-compact:load`
+2. Manually revert the conversation to that point using Shift-Shift. Make sure to select the "Restore conversation" option (not "Restore code and conversation")
+3. Type `/better-compact:load`
+
+For full compaction:
+1. In a long conversation, type `/better-compact:compact-full`.
+2. Type `/clear`
+3. Type `/better-compact:load`
 
 ### Use cases
 - Read large files but only need specific information

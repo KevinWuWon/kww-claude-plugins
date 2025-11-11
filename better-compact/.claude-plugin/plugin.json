@@ -1,0 +1,8 @@
+{
+  "name": "better-compact",
+  "description": "A compaction tool that's better than the built in one. Supports full or tail compaction",
+  "version": "1.0.0",
+  "author": {
+    "name": "Kevin Wu Won"
+  }
+}
