@@ -15,9 +15,9 @@
       "description": "Splits the HEAD commit into a sequence of smaller commits"
     },
     {
-      "name": "convex-rules",
-      "source": "./convex-rules",
-      "description": "A skill packaging rules for writing Convex backend code"
+      "name": "convex-chef",
+      "source": "./convex-chef",
+      "description": "Convex backend development guidelines with proactive code review, extracted from Chef"
     }
   ]
 }

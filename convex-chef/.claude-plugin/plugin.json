@@ -1,0 +1,9 @@
+{
+  "name": "convex-chef",
+  "version": "1.0.0",
+  "description": "Convex backend development guidelines and best practices, extracted from Chef",
+  "author": {
+    "name": "kww"
+  },
+  "keywords": ["convex", "backend", "database", "realtime", "typescript"]
+}
