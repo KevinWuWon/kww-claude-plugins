@@ -1,0 +1,8 @@
+{
+  "name": "convex-rules",
+  "description": "A skill packaging rules for writing Convex backend code",
+  "version": "1.0.0",
+  "author": {
+    "name": "Kevin Wu Won"
+  }
+}

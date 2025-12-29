@@ -13,6 +13,11 @@
       "name": "split-commit",
       "source": "./split-commit",
       "description": "Splits the HEAD commit into a sequence of smaller commits"
+    },
+    {
+      "name": "convex-rules",
+      "source": "./convex-rules",
+      "description": "A skill packaging rules for writing Convex backend code"
     }
   ]
 }
