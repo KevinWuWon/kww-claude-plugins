@@ -6,6 +6,8 @@ allowed-tools: ["Bash"]
 ---
 Consult Codex with the user's question or request.
 
-- Run: `codex exec "PROMPT"`
+If it's a code review request:
+- Run with Bash tool: `codex review [<args>] [<prompt>]` where args is --uncommitted | --base | --commit
 
-It has access to the filesystem and git so you don't need to read the files for it; it can gather context itself.
+If it's a general request:
+- Run with Bash tool: `codex exec "PROMPT"`
