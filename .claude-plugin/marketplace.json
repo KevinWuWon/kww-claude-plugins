@@ -23,6 +23,11 @@
       "name": "codex-consultant",
       "source": "./codex-consultant",
       "description": "Consult OpenAI Codex CLI for second opinions on code review, architecture analysis, debugging, and technical research"
+    },
+    {
+      "name": "react",
+      "source": "./react",
+      "description": "React and Next.js performance optimization guidelines from Vercel Engineering with 45+ rules"
     }
   ]
 }

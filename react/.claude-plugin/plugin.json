@@ -1,0 +1,9 @@
+{
+  "name": "react",
+  "version": "0.1.0",
+  "description": "React and Next.js performance optimization guidelines from Vercel Engineering with 45+ rules across 8 categories",
+  "author": {
+    "name": "Vercel"
+  },
+  "keywords": ["react", "nextjs", "performance", "optimization", "vercel", "frontend"]
+}
