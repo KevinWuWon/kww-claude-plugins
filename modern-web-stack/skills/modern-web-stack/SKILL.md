@@ -1,6 +1,7 @@
 ---
 name: modern-web-stack
 description: Scaffold a production-ready web app using TanStack Start with Convex backend, shadcn/ui, Biome, Vitest, and Playwright.
+user-invocable: true
 ---
 
 # Modern Web Stack
