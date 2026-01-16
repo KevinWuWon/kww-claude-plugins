@@ -1,0 +1,5 @@
+{
+  "name": "modern-web-stack",
+  "version": "1.0.0",
+  "description": "Scaffold production-ready web apps with TanStack Start, Convex, shadcn/ui, and modern dev tooling"
+}
