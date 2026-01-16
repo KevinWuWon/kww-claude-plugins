@@ -11,6 +11,8 @@ Full-stack React framework with file-based routing and SSR.
 - Built-in devtools for debugging
 - Powered by Vinxi (Vite-based)
 
+**CLI:** `bun create @tanstack/start@latest`
+
 ### React
 
 Latest React with concurrent features and new JSX transform.
@@ -94,6 +96,8 @@ JavaScript runtime and package manager.
 Fast linter and formatter (replaces ESLint + Prettier).
 
 **Configuration:** `biome.json`
+
+**Note:** Enable `css.parser.tailwindDirectives: true` for Tailwind v4 syntax support.
 
 ### TypeScript
 

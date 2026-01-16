@@ -7,27 +7,27 @@ Detailed acceptance criteria for each setup step.
 **With Convex (data persistence needed):**
 
 ```bash
-bunx create-tanstack-app@latest --add-on convex --add-on shadcn
+bun create @tanstack/start@latest <project-name> --add-on convex --add-on shadcn
 ```
-
-**Acceptance Criteria:**
-- [ ] Project created with TanStack Start, Convex, and shadcn add-ons
-- [ ] `bun dev` starts both TanStack Start and Convex dev servers
-- [ ] Basic route renders at localhost
-- [ ] Convex dashboard accessible
-- [ ] Typecheck passes
 
 **Without Convex (no data persistence):**
 
 ```bash
-bunx create-tanstack-app@latest --add-on shadcn
+bun create @tanstack/start@latest <project-name> --add-on shadcn
 ```
 
+**Important:**
+- Use `bun create @tanstack/start@latest` (NOT `create-tanstack-app` which creates TanStack Router SPA)
+- The CLI creates a subdirectory. If already in target directory, move files up:
+  ```bash
+  mv <project-name>/* <project-name>/.[!.]* . && rmdir <project-name>
+  ```
+
 **Acceptance Criteria:**
-- [ ] Project created with TanStack Start and shadcn add-ons
-- [ ] `bun dev` starts the dev server
-- [ ] Basic route renders at localhost
-- [ ] Typecheck passes
+- [ ] Project created with TanStack Start and selected add-ons
+- [ ] `bun dev` starts the dev server (and Convex if enabled)
+- [ ] Basic route renders at localhost:3000
+- [ ] `bun run typecheck` passes (add `"typecheck": "tsc --noEmit"` if missing)
 
 ## Step 2: Configure Biome
 
@@ -37,9 +37,59 @@ bun add -D @biomejs/biome
 bunx biome init
 ```
 
+**Configure `biome.json` (Biome 2.x):**
+```json
+{
+  "$schema": "https://biomejs.dev/schemas/2.3.11/schema.json",
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true
+  },
+  "files": {
+    "ignoreUnknown": false,
+    "includes": ["**", "!.claude"]
+  },
+  "formatter": {
+    "enabled": true,
+    "indentStyle": "space",
+    "indentWidth": 2
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true
+    }
+  },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "double"
+    }
+  },
+  "css": {
+    "parser": {
+      "tailwindDirectives": true
+    }
+  },
+  "assist": {
+    "enabled": true,
+    "actions": {
+      "source": {
+        "organizeImports": "on"
+      }
+    }
+  }
+}
+```
+
+**Biome 2.x Notes:**
+- Enable `tailwindDirectives: true` in `css.parser` for Tailwind v4 support
+- Negation patterns must come AFTER `**` in `includes`
+- Run `bunx biome check --write .` to auto-fix
+
 **Acceptance Criteria:**
 - [ ] Biome installed
-- [ ] `biome.json` configured with recommended rules
+- [ ] `biome.json` configured with Tailwind directives enabled
 - [ ] `bun lint` runs Biome check
 - [ ] `bun format` runs Biome format
 - [ ] Pre-existing ESLint/Prettier configs removed
@@ -101,25 +151,51 @@ Without Convex:
 
 **Commands:**
 ```bash
-bun add -D vitest @vitest/ui
+bun add -D vitest @vitest/ui @testing-library/react @testing-library/dom jsdom
+```
+
+**Create `vitest.config.ts`** (required for jsdom environment):
+```typescript
+import { fileURLToPath, URL } from "node:url";
+import viteReact from "@vitejs/plugin-react";
+import { defineConfig } from "vitest/config";
+
+export default defineConfig({
+  plugins: [viteReact()],
+  test: {
+    environment: "jsdom",
+    globals: true,
+    setupFiles: [],
+  },
+  resolve: {
+    alias: {
+      "@": fileURLToPath(new URL("./src", import.meta.url)),
+    },
+  },
+});
+```
+
+**If E2E testing requested:**
+```bash
 bun add -D @playwright/test
 bunx playwright install chromium
 ```
 
+**Important:** Use `bun run test` (NOT `bun test`) - the latter invokes Bun's native test runner.
+
 **Acceptance Criteria:**
 - [ ] Vitest installed
-- [ ] Playwright installed
-- [ ] `vitest.config.ts` configured
-- [ ] `playwright.config.ts` configured
-- [ ] `bun test` runs Vitest
-- [ ] `bun test:e2e` runs Playwright
+- [ ] `vitest.config.ts` created with jsdom environment
+- [ ] `bun run test` runs Vitest (not Bun's test runner)
+- [ ] Playwright installed (if E2E requested)
+- [ ] `playwright.config.ts` configured (if E2E requested)
 - [ ] Sample test passes
 - [ ] Typecheck passes
 
 **package.json scripts to add:**
 ```json
 {
-  "test": "vitest",
+  "test": "vitest run",
   "test:e2e": "playwright test"
 }
 ```
@@ -231,11 +307,11 @@ bun add -D npm-run-all
 Run through these commands to verify setup is complete:
 
 ```bash
-bun dev           # Dev server(s) start
-bun typecheck     # No type errors
-bun lint          # No lint errors
-bun test          # Unit tests pass
-bun test:e2e      # E2E tests pass
-bun check:duplicates  # No problematic duplicates
-bun check:unused      # No dead code
+bun dev                    # Dev server(s) start
+bun run typecheck          # No type errors
+bun lint                   # No lint errors
+bun run test               # Unit tests pass (use 'bun run test', NOT 'bun test')
+bun run test:e2e           # E2E tests pass (if E2E enabled)
+bun run check:duplicates   # No problematic duplicates
+bun run check:unused       # No dead code
 ```

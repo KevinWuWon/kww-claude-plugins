@@ -57,25 +57,23 @@ Follow these steps in order. Each step should pass typecheck before proceeding.
 **With Convex (data persistence needed):**
 
 ```bash
-bunx create-tanstack-app@latest --add-on convex --add-on shadcn
+bun create @tanstack/start@latest <project-name> --add-on convex --add-on shadcn
 ```
-
-Verify:
-- `bun dev` starts both TanStack Start and Convex dev servers
-- Basic route renders at localhost
-- Convex dashboard accessible
-- `bun run typecheck` passes
 
 **Without Convex (no data persistence):**
 
 ```bash
-bunx create-tanstack-app@latest --add-on shadcn
+bun create @tanstack/start@latest <project-name> --add-on shadcn
 ```
 
+**Important Notes:**
+- The CLI creates a subdirectory with the project name. If you're already in the target directory, you may need to move files up: `mv <project-name>/* <project-name>/.[!.]* . && rmdir <project-name>`
+- Use `bun create @tanstack/start@latest` (NOT `create-tanstack-app` which creates TanStack Router SPA, not TanStack Start SSR)
+
 Verify:
-- `bun dev` starts the dev server
-- Basic route renders at localhost
-- `bun run typecheck` passes
+- `bun dev` starts the dev server (and Convex if enabled)
+- Basic route renders at localhost:3000
+- `bun run typecheck` passes (add script if missing: `"typecheck": "tsc --noEmit"`)
 
 ### Step 2: Configure Biome
 
@@ -85,6 +83,57 @@ Install and configure Biome (replaces ESLint/Prettier):
 bun add -D @biomejs/biome
 bunx biome init
 ```
+
+**Configure `biome.json` for the project:**
+
+```json
+{
+  "$schema": "https://biomejs.dev/schemas/2.3.11/schema.json",
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true
+  },
+  "files": {
+    "ignoreUnknown": false,
+    "includes": ["**", "!.claude"]
+  },
+  "formatter": {
+    "enabled": true,
+    "indentStyle": "space",
+    "indentWidth": 2
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true
+    }
+  },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "double"
+    }
+  },
+  "css": {
+    "parser": {
+      "tailwindDirectives": true
+    }
+  },
+  "assist": {
+    "enabled": true,
+    "actions": {
+      "source": {
+        "organizeImports": "on"
+      }
+    }
+  }
+}
+```
+
+**Important Biome 2.x Notes:**
+- Enable `tailwindDirectives: true` in `css.parser` to support Tailwind v4 syntax (`@theme`, `@apply`, `@custom-variant`)
+- In `includes`, negation patterns must come AFTER `**` (e.g., `["**", "!.claude"]`)
+- Run `bunx biome check --write .` to auto-fix imports and formatting
 
 Add scripts to `package.json`:
 
@@ -137,23 +186,45 @@ Verify: Both commands run successfully, typecheck passes.
 
 ### Step 4: Set Up Testing Framework
 
-Install Vitest for unit tests:
+Install Vitest for unit tests (may already be included by template):
 
 ```bash
-bun add -D vitest @vitest/ui
+bun add -D vitest @vitest/ui @testing-library/react @testing-library/dom jsdom
 ```
 
-Create `vitest.config.ts` for the project.
+**Create `vitest.config.ts`** (required for jsdom environment):
+
+```typescript
+import { fileURLToPath, URL } from "node:url";
+import viteReact from "@vitejs/plugin-react";
+import { defineConfig } from "vitest/config";
+
+export default defineConfig({
+  plugins: [viteReact()],
+  test: {
+    environment: "jsdom",
+    globals: true,
+    setupFiles: [],
+  },
+  resolve: {
+    alias: {
+      "@": fileURLToPath(new URL("./src", import.meta.url)),
+    },
+  },
+});
+```
 
 Add scripts:
 
 ```json
 {
   "scripts": {
-    "test": "vitest"
+    "test": "vitest run"
   }
 }
 ```
+
+**Important:** Use `bun run test` (not `bun test`) to run the npm script. `bun test` invokes Bun's native test runner instead.
 
 **If E2E testing requested**, also install Playwright:
 
@@ -172,7 +243,7 @@ Create `playwright.config.ts` and add script:
 }
 ```
 
-Verify: Sample tests pass, typecheck passes.
+Verify: `bun run test` passes, typecheck passes.
 
 ### Step 5: Set Up Convex Auth (if requested)
 
@@ -311,12 +382,12 @@ For detailed configuration examples and patterns:
 | Task | Command | Notes |
 |------|---------|-------|
 | Start dev servers | `bun dev` | |
-| Build for production | `bun build` | |
-| Type check | `bun typecheck` | |
+| Build for production | `bun run build` | |
+| Type check | `bun run typecheck` | |
 | Lint code | `bun lint` | |
 | Format code | `bun format` | |
-| Run unit tests | `bun test` | |
-| Run E2E tests | `bun test:e2e` | If E2E enabled |
-| Check duplicates | `bun check:duplicates` | |
-| Check unused code | `bun check:unused` | |
+| Run unit tests | `bun run test` | Use `bun run test`, NOT `bun test` |
+| Run E2E tests | `bun run test:e2e` | If E2E enabled |
+| Check duplicates | `bun run check:duplicates` | |
+| Check unused code | `bun run check:unused` | |
 | Deploy Convex | `npx convex deploy` | If Convex enabled |
