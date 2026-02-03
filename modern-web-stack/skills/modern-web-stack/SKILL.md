@@ -57,18 +57,18 @@ Follow these steps in order. Each step should pass typecheck before proceeding.
 **With Convex (data persistence needed):**
 
 ```bash
-bun create @tanstack/start@latest <project-name> --add-on convex --add-on shadcn
+bunx @tanstack/cli create <project-name> --add-ons convex,shadcn
 ```
 
 **Without Convex (no data persistence):**
 
 ```bash
-bun create @tanstack/start@latest <project-name> --add-on shadcn
+bunx @tanstack/cli create <project-name> --add-ons shadcn
 ```
 
 **Important Notes:**
 - The CLI creates a subdirectory with the project name. If you're already in the target directory, you may need to move files up: `mv <project-name>/* <project-name>/.[!.]* . && rmdir <project-name>`
-- Use `bun create @tanstack/start@latest` (NOT `create-tanstack-app` which creates TanStack Router SPA, not TanStack Start SSR)
+- Use `bunx @tanstack/cli create` (NOT `create-tanstack-app` which creates TanStack Router SPA, not TanStack Start SSR)
 
 Verify:
 - `bun dev` starts the dev server (and Convex if enabled)
