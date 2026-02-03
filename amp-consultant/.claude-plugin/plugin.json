@@ -1,0 +1,8 @@
+{
+  "name": "amp-consultant",
+  "version": "0.1.0",
+  "description": "Consult Sourcegraph Amp CLI for second opinions on code review, architecture analysis, debugging, and technical research",
+  "author": {
+    "name": "Kevin Wu Won"
+  }
+}

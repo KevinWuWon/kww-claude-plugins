@@ -25,6 +25,11 @@
       "description": "Consult OpenAI Codex CLI for second opinions on code review, architecture analysis, debugging, and technical research"
     },
     {
+      "name": "amp-consultant",
+      "source": "./amp-consultant",
+      "description": "Consult Sourcegraph Amp CLI for second opinions on code review, architecture analysis, debugging, and technical research"
+    },
+    {
       "name": "react",
       "source": "./react",
       "description": "React and Next.js performance optimization guidelines from Vercel Engineering with 45+ rules"
