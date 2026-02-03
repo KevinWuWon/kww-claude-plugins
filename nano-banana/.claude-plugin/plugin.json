@@ -1,0 +1,8 @@
+{
+  "name": "nano-banana",
+  "version": "1.0.0",
+  "description": "Generate and edit images using Nano Banana (Gemini CLI). Handles blog featured images, YouTube thumbnails, icons, diagrams, patterns, illustrations, and visual assets.",
+  "author": {
+    "name": "Kevin Koppenhaver"
+  }
+}

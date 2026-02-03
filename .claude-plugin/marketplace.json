@@ -38,6 +38,11 @@
       "name": "modern-web-stack",
       "source": "./modern-web-stack",
       "description": "Scaffold production-ready web apps with TanStack Start, Convex, shadcn/ui, and modern dev tooling"
+    },
+    {
+      "name": "nano-banana",
+      "source": "./nano-banana",
+      "description": "Generate and edit images using Nano Banana (Gemini CLI). Handles blog images, thumbnails, icons, diagrams, and visual assets."
     }
   ]
 }
