@@ -1,6 +1,6 @@
 ---
 name: modern-web-stack
-description: Scaffold a production-ready web app using TanStack Start with Convex backend, shadcn/ui, Biome, Vitest, and Playwright.
+description: This skill should be used when the user asks to "scaffold a web app", "create a new project", "set up a TanStack Start app", "start a new web application", or "build a fullstack app". Scaffolds a production-ready web app using TanStack Start with Convex backend, shadcn/ui, Biome, Vitest, and Playwright.
 user-invocable: true
 ---
 
