@@ -1,7 +1,6 @@
 ---
 name: nano-banana
-description: REQUIRED for all image generation requests. Generate and edit images using Nano Banana (Gemini CLI). Handles blog featured images, YouTube thumbnails, icons, diagrams, patterns, illustrations, photos, visual assets, graphics, artwork, pictures. Use this skill whenever the user asks to create, generate, make, draw, design, or edit any image or visual content.
-allowed-tools: Bash(gemini:*)
+description: This skill should be used when the user asks to "generate an image", "create a thumbnail", "make an icon", "draw a diagram", "design a banner", "edit a photo", "restore a photo", or "create a pattern". Generates and edits images using Nano Banana (Gemini CLI) for blog featured images, YouTube thumbnails, icons, diagrams, patterns, illustrations, and visual assets.
 ---
 
 # Nano Banana Image Generation
