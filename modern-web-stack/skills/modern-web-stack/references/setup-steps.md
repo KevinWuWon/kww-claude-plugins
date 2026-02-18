@@ -107,16 +107,21 @@ bunx biome init
 
 **Commands:**
 ```bash
-bun add -D jscpd knip
+bun add -D jscpd react-doctor
+```
+
+Install temporal-polyfill for date/time handling:
+```bash
+bun add temporal-polyfill
 ```
 
 **Acceptance Criteria:**
 - [ ] jscpd installed
-- [ ] knip installed
+- [ ] react-doctor installed
+- [ ] temporal-polyfill installed
 - [ ] `jscpd.json` configured for TypeScript/TSX files
-- [ ] `knip.json` configured for project structure
 - [ ] `bun run check:duplicates` runs jscpd
-- [ ] `bun run check:unused` runs knip
+- [ ] `bun run check:health` runs react-doctor
 - [ ] Typecheck passes
 
 **jscpd.json example:**
@@ -135,7 +140,7 @@ With Convex:
 ```json
 {
   "check:duplicates": "jscpd src convex",
-  "check:unused": "knip"
+  "check:health": "react-doctor"
 }
 ```
 
@@ -143,7 +148,7 @@ Without Convex:
 ```json
 {
   "check:duplicates": "jscpd src",
-  "check:unused": "knip"
+  "check:health": "react-doctor"
 }
 ```
 
@@ -274,7 +279,7 @@ bun add @ai-sdk/anthropic
     "test": "vitest",
     "test:e2e": "playwright test",
     "check:duplicates": "jscpd src convex",
-    "check:unused": "knip"
+    "check:health": "react-doctor"
   }
 }
 ```
@@ -297,7 +302,7 @@ bun add -D npm-run-all
     "test": "vitest",
     "test:e2e": "playwright test",
     "check:duplicates": "jscpd src",
-    "check:unused": "knip"
+    "check:health": "react-doctor"
   }
 }
 ```
@@ -313,5 +318,5 @@ bun lint                   # No lint errors
 bun run test               # Unit tests pass (use 'bun run test', NOT 'bun test')
 bun run test:e2e           # E2E tests pass (if E2E enabled)
 bun run check:duplicates   # No problematic duplicates
-bun run check:unused       # No dead code
+bun run check:health       # No code health issues
 ```

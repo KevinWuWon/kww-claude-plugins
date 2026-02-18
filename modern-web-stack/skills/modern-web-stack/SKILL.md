@@ -22,7 +22,8 @@ Build production-ready web applications using TanStack Start with Convex backend
 | Linting/Formatting | Biome |
 | Unit Tests | Vitest |
 | E2E Tests | Playwright (optional) |
-| Code Quality | jscpd (duplication), knip (dead code) |
+| Code Quality | jscpd (duplication), react-doctor (code health) |
+| Date/Time | temporal-polyfill |
 
 ## Initial Questions
 
@@ -152,10 +153,10 @@ Verify: `bun lint` and `bun format` work, typecheck passes.
 
 ### Step 3: Configure Code Quality Tools
 
-Install jscpd (copy-paste detection) and knip (dead code detection):
+Install jscpd (copy-paste detection) and react-doctor (React code health):
 
 ```bash
-bun add -D jscpd knip
+bun add -D jscpd react-doctor
 ```
 
 Create `jscpd.json`:
@@ -169,7 +170,13 @@ Create `jscpd.json`:
 }
 ```
 
-Create `knip.json` configured for the project structure.
+Install temporal-polyfill for date/time handling:
+
+```bash
+bun add temporal-polyfill
+```
+
+This provides the TC39 Temporal API polyfill — use `Temporal.PlainDate`, `Temporal.ZonedDateTime`, `Temporal.Duration`, etc. instead of date-fns/dayjs/moment.
 
 Add scripts:
 
@@ -177,7 +184,7 @@ Add scripts:
 {
   "scripts": {
     "check:duplicates": "jscpd src convex",
-    "check:unused": "knip"
+    "check:health": "react-doctor"
   }
 }
 ```
@@ -303,7 +310,7 @@ Verify: Typecheck passes.
     "format": "biome format --write .",
     "test": "vitest",
     "check:duplicates": "jscpd src",
-    "check:unused": "knip"
+    "check:health": "react-doctor"
   }
 }
 ```
@@ -389,5 +396,5 @@ For detailed configuration examples and patterns:
 | Run unit tests | `bun run test` | Use `bun run test`, NOT `bun test` |
 | Run E2E tests | `bun run test:e2e` | If E2E enabled |
 | Check duplicates | `bun run check:duplicates` | |
-| Check unused code | `bun run check:unused` | |
+| Check code health | `bun run check:health` | |
 | Deploy Convex | `npx convex deploy` | If Convex enabled |

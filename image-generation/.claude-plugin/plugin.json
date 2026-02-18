@@ -1,0 +1,5 @@
+{
+  "name": "image-generation",
+  "version": "1.0.0",
+  "description": "Generate and edit images using Nano Banana (Gemini CLI)."
+}

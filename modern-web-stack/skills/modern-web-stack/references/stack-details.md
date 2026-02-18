@@ -131,9 +131,13 @@ End-to-end testing framework.
 
 Copy-paste detection. **Configuration:** `jscpd.json`
 
-### knip
+### react-doctor
 
-Dead code detection. **Configuration:** `knip.json`
+React code health analysis from Million.js. Checks for dead code, 47+ best practice rules, and common React anti-patterns. No configuration file needed.
+
+### temporal-polyfill
+
+TC39 Temporal API polyfill for date/time handling (~20kB). Spec-compliant replacement for date-fns/dayjs/moment. Use `Temporal.PlainDate`, `Temporal.ZonedDateTime`, `Temporal.Duration`, etc.
 
 ## AI Integration (Optional)
 
