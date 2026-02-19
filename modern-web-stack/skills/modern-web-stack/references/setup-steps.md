@@ -7,17 +7,17 @@ Detailed acceptance criteria for each setup step.
 **With Convex (data persistence needed):**
 
 ```bash
-bun create @tanstack/start@latest <project-name> --add-on convex --add-on shadcn
+bunx @tanstack/cli create <project-name> --add-ons convex,shadcn
 ```
 
 **Without Convex (no data persistence):**
 
 ```bash
-bun create @tanstack/start@latest <project-name> --add-on shadcn
+bunx @tanstack/cli create <project-name> --add-ons shadcn
 ```
 
 **Important:**
-- Use `bun create @tanstack/start@latest` (NOT `create-tanstack-app` which creates TanStack Router SPA)
+- Use `bunx @tanstack/cli create` (NOT `create-tanstack-app` which creates TanStack Router SPA, not TanStack Start SSR)
 - The CLI creates a subdirectory. If already in target directory, move files up:
   ```bash
   mv <project-name>/* <project-name>/.[!.]* . && rmdir <project-name>
@@ -27,83 +27,101 @@ bun create @tanstack/start@latest <project-name> --add-on shadcn
 - [ ] Project created with TanStack Start and selected add-ons
 - [ ] `bun dev` starts the dev server (and Convex if enabled)
 - [ ] Basic route renders at localhost:3000
-- [ ] `bun run typecheck` passes (add `"typecheck": "tsc --noEmit"` if missing)
+- [ ] `@typescript/native-preview` installed (`bun add -D @typescript/native-preview`)
+- [ ] `bun run typecheck` passes (add `"typecheck": "tsgo --noEmit"` if missing)
 
-## Step 2: Configure Biome
+## Step 2: Configure oxfmt + oxlint
 
 **Commands:**
 ```bash
-bun add -D @biomejs/biome
-bunx biome init
+bun add -D oxfmt oxlint @nkzw/oxlint-config
 ```
 
-**Configure `biome.json` (Biome 2.x):**
-```json
+**Configure oxfmt** — create `.oxfmtrc.jsonc`:
+```jsonc
 {
-  "$schema": "https://biomejs.dev/schemas/2.3.11/schema.json",
-  "vcs": {
-    "enabled": true,
-    "clientKind": "git",
-    "useIgnoreFile": true
-  },
-  "files": {
-    "ignoreUnknown": false,
-    "includes": ["**", "!.claude"]
-  },
-  "formatter": {
-    "enabled": true,
-    "indentStyle": "space",
-    "indentWidth": 2
-  },
-  "linter": {
-    "enabled": true,
-    "rules": {
-      "recommended": true
-    }
-  },
-  "javascript": {
-    "formatter": {
-      "quoteStyle": "double"
-    }
-  },
-  "css": {
-    "parser": {
-      "tailwindDirectives": true
-    }
-  },
-  "assist": {
-    "enabled": true,
-    "actions": {
-      "source": {
-        "organizeImports": "on"
-      }
-    }
-  }
+  "$schema": "https://oxc.rs/schemas/oxfmt/0.x.x.json",
+  "semi": true,
+  "singleQuote": false,
+  "tabWidth": 2,
+  "trailingComma": "all",
+  "experimentalSortImports": {},
+  "experimentalTailwindcss": {}
 }
 ```
 
-**Biome 2.x Notes:**
-- Enable `tailwindDirectives: true` in `css.parser` for Tailwind v4 support
-- Negation patterns must come AFTER `**` in `includes`
-- Run `bunx biome check --write .` to auto-fix
+**Configure oxlint** — create `oxlint.config.ts`:
+```typescript
+import nkzw from "@nkzw/oxlint-config";
+import { defineConfig } from "oxlint";
+
+export default defineConfig({
+  extends: [nkzw],
+});
+```
+
+**oxfmt Notes:**
+- Defaults to `printWidth: 100` (wider than Prettier's 80, better for TypeScript)
+- Supports `.editorconfig` properties
+- Built-in import sorting via `experimentalSortImports`
+- Built-in Tailwind CSS class sorting via `experimentalTailwindcss`
+
+**oxlint Notes:**
+- @nkzw/oxlint-config enforces strict rules — errors only, no warnings
+- ESLint plugins can be used via `jsPlugins` field (see https://oxc.rs/docs/guide/usage/linter/js-plugins.html)
+- Some plugin names are reserved (react, import, jest, typescript) — use aliases for JS versions
 
 **Acceptance Criteria:**
-- [ ] Biome installed
-- [ ] `biome.json` configured with Tailwind directives enabled
-- [ ] `bun lint` runs Biome check
-- [ ] `bun format` runs Biome format
-- [ ] Pre-existing ESLint/Prettier configs removed
+- [ ] oxfmt and oxlint installed
+- [ ] `.oxfmtrc.jsonc` configured with Tailwind class sorting
+- [ ] `oxlint.config.ts` configured with @nkzw/oxlint-config
+- [ ] `bun lint` runs oxlint
+- [ ] `bun format` runs oxfmt
+- [ ] Pre-existing ESLint/Prettier/Biome configs removed
 - [ ] Typecheck passes
 
 **package.json scripts to add:**
 ```json
 {
-  "lint": "biome check .",
-  "format": "biome format --write ."
+  "lint": "oxlint",
+  "format": "oxfmt --write .",
+  "format:check": "oxfmt --check ."
 }
 ```
 
-## Step 3: Configure Code Quality Tools
+## Step 3: Enable React Compiler
+
+**Commands:**
+```bash
+bun add -D babel-plugin-react-compiler
+```
+
+**Configure in `app.config.ts`:**
+
+TanStack Start uses Vinxi (Vite-based). Add the React Compiler babel plugin to the TanStack Start config:
+
+```typescript
+import { defineConfig } from "@tanstack/react-start/config";
+
+export default defineConfig({
+  react: {
+    babel: {
+      plugins: ["babel-plugin-react-compiler"],
+    },
+  },
+});
+```
+
+**Important:** The React Compiler babel plugin must run first in the babel pipeline.
+
+**Acceptance Criteria:**
+- [ ] `babel-plugin-react-compiler` installed
+- [ ] React Compiler configured in `app.config.ts`
+- [ ] `bun dev` starts without errors
+- [ ] Optimized components show "Memo" badge in React DevTools
+- [ ] Typecheck passes
+
+## Step 4: Configure Code Quality Tools
 
 **Commands:**
 ```bash
@@ -139,7 +157,7 @@ bun add temporal-polyfill
 With Convex:
 ```json
 {
-  "check:duplicates": "jscpd src convex",
+  "check:duplicates": "jscpd app convex",
   "check:health": "react-doctor"
 }
 ```
@@ -147,12 +165,12 @@ With Convex:
 Without Convex:
 ```json
 {
-  "check:duplicates": "jscpd src",
+  "check:duplicates": "jscpd app",
   "check:health": "react-doctor"
 }
 ```
 
-## Step 4: Set Up Testing Framework
+## Step 5: Set Up Testing Framework
 
 **Commands:**
 ```bash
@@ -174,7 +192,7 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      "@": fileURLToPath(new URL("./src", import.meta.url)),
+      "@": fileURLToPath(new URL("./app", import.meta.url)),
     },
   },
 });
@@ -205,7 +223,7 @@ bunx playwright install chromium
 }
 ```
 
-## Step 5: Set Up Convex Auth (Convex only)
+## Step 6: Set Up Convex Auth (Convex only)
 
 Skip if not using Convex.
 
@@ -225,7 +243,7 @@ npx convex component add @convex-dev/auth
 - `AUTH_GOOGLE_ID` - Google OAuth client ID
 - `AUTH_GOOGLE_SECRET` - Google OAuth client secret
 
-## Step 6: Install Convex Workflow (Convex only, optional)
+## Step 7: Install Convex Workflow (Convex only, optional)
 
 Skip if not using Convex.
 
@@ -240,7 +258,7 @@ npx convex component add @convex-dev/workflow
 - [ ] Retry behavior configured (e.g., 3 attempts, exponential backoff)
 - [ ] Typecheck passes
 
-## Step 7: Configure AI Dependencies (Optional)
+## Step 8: Configure AI Dependencies (Optional)
 
 **Commands:**
 ```bash
@@ -273,12 +291,13 @@ bun add @ai-sdk/anthropic
     "dev:frontend": "vinxi dev",
     "dev:backend": "convex dev",
     "build": "vinxi build",
-    "typecheck": "tsc --noEmit",
-    "lint": "biome check .",
-    "format": "biome format --write .",
-    "test": "vitest",
+    "typecheck": "tsgo --noEmit",
+    "lint": "oxlint",
+    "format": "oxfmt --write .",
+    "format:check": "oxfmt --check .",
+    "test": "vitest run",
     "test:e2e": "playwright test",
-    "check:duplicates": "jscpd src convex",
+    "check:duplicates": "jscpd app convex",
     "check:health": "react-doctor"
   }
 }
@@ -296,12 +315,13 @@ bun add -D npm-run-all
   "scripts": {
     "dev": "vinxi dev",
     "build": "vinxi build",
-    "typecheck": "tsc --noEmit",
-    "lint": "biome check .",
-    "format": "biome format --write .",
-    "test": "vitest",
+    "typecheck": "tsgo --noEmit",
+    "lint": "oxlint",
+    "format": "oxfmt --write .",
+    "format:check": "oxfmt --check .",
+    "test": "vitest run",
     "test:e2e": "playwright test",
-    "check:duplicates": "jscpd src",
+    "check:duplicates": "jscpd app",
     "check:health": "react-doctor"
   }
 }
@@ -315,6 +335,8 @@ Run through these commands to verify setup is complete:
 bun dev                    # Dev server(s) start
 bun run typecheck          # No type errors
 bun lint                   # No lint errors
+bun format                 # Format all files
+bun run format:check       # Verify formatting (CI)
 bun run test               # Unit tests pass (use 'bun run test', NOT 'bun test')
 bun run test:e2e           # E2E tests pass (if E2E enabled)
 bun run check:duplicates   # No problematic duplicates

@@ -1,6 +1,6 @@
 ---
 name: modern-web-stack
-description: This skill should be used when the user asks to "scaffold a web app", "create a new project", "set up a TanStack Start app", "start a new web application", or "build a fullstack app". Scaffolds a production-ready web app using TanStack Start with Convex backend, shadcn/ui, Biome, Vitest, and Playwright.
+description: This skill should be used when the user asks to "scaffold a web app", "create a new project", "set up a TanStack Start app", "start a new web application", or "build a fullstack app". Scaffolds a production-ready web app using TanStack Start with Convex backend, shadcn/ui, oxlint, oxfmt, tsgo, React Compiler, Vitest, and Playwright.
 user-invocable: true
 ---
 
@@ -19,7 +19,10 @@ Build production-ready web applications using TanStack Start with Convex backend
 | UI Components | shadcn/ui |
 | Styling | Tailwind CSS |
 | Package Manager | Bun |
-| Linting/Formatting | Biome |
+| Linting | oxlint + @nkzw/oxlint-config |
+| Formatting | oxfmt |
+| Type Checking | tsgo (@typescript/native-preview) |
+| React Optimization | React Compiler |
 | Unit Tests | Vitest |
 | E2E Tests | Playwright (optional) |
 | Code Quality | jscpd (duplication), react-doctor (code health) |
@@ -74,84 +77,105 @@ bunx @tanstack/cli create <project-name> --add-ons shadcn
 Verify:
 - `bun dev` starts the dev server (and Convex if enabled)
 - Basic route renders at localhost:3000
-- `bun run typecheck` passes (add script if missing: `"typecheck": "tsc --noEmit"`)
+- `bun run typecheck` passes (add script if missing: `"typecheck": "tsgo --noEmit"`)
 
-### Step 2: Configure Biome
-
-Install and configure Biome (replaces ESLint/Prettier):
+**Install tsgo** (native TypeScript compiler, ~10x faster than tsc):
 
 ```bash
-bun add -D @biomejs/biome
-bunx biome init
+bun add -D @typescript/native-preview
 ```
 
-**Configure `biome.json` for the project:**
+### Step 2: Configure oxfmt + oxlint
 
-```json
+Install oxfmt (formatter) and oxlint (linter) with the @nkzw/oxlint-config shared config:
+
+```bash
+bun add -D oxfmt oxlint @nkzw/oxlint-config
+```
+
+**Configure oxfmt** — create `.oxfmtrc.jsonc`:
+
+```jsonc
 {
-  "$schema": "https://biomejs.dev/schemas/2.3.11/schema.json",
-  "vcs": {
-    "enabled": true,
-    "clientKind": "git",
-    "useIgnoreFile": true
-  },
-  "files": {
-    "ignoreUnknown": false,
-    "includes": ["**", "!.claude"]
-  },
-  "formatter": {
-    "enabled": true,
-    "indentStyle": "space",
-    "indentWidth": 2
-  },
-  "linter": {
-    "enabled": true,
-    "rules": {
-      "recommended": true
-    }
-  },
-  "javascript": {
-    "formatter": {
-      "quoteStyle": "double"
-    }
-  },
-  "css": {
-    "parser": {
-      "tailwindDirectives": true
-    }
-  },
-  "assist": {
-    "enabled": true,
-    "actions": {
-      "source": {
-        "organizeImports": "on"
-      }
-    }
-  }
+  "$schema": "https://oxc.rs/schemas/oxfmt/0.x.x.json",
+  "semi": true,
+  "singleQuote": false,
+  "tabWidth": 2,
+  "trailingComma": "all",
+  "experimentalSortImports": {},
+  "experimentalTailwindcss": {}
 }
 ```
 
-**Important Biome 2.x Notes:**
-- Enable `tailwindDirectives: true` in `css.parser` to support Tailwind v4 syntax (`@theme`, `@apply`, `@custom-variant`)
-- In `includes`, negation patterns must come AFTER `**` (e.g., `["**", "!.claude"]`)
-- Run `bunx biome check --write .` to auto-fix imports and formatting
+**Configure oxlint** — create `oxlint.config.ts`:
+
+```typescript
+import nkzw from "@nkzw/oxlint-config";
+import { defineConfig } from "oxlint";
+
+export default defineConfig({
+  extends: [nkzw],
+});
+```
+
+ESLint plugins can also be used via the `jsPlugins` field (see https://oxc.rs/docs/guide/usage/linter/js-plugins.html):
+
+```typescript
+import nkzw from "@nkzw/oxlint-config";
+import { defineConfig } from "oxlint";
+
+export default defineConfig({
+  extends: [nkzw],
+  jsPlugins: ["eslint-plugin-playwright"],
+  rules: {
+    "playwright/no-focused-test": "error",
+  },
+});
+```
 
 Add scripts to `package.json`:
 
 ```json
 {
   "scripts": {
-    "lint": "biome check .",
-    "format": "biome format --write ."
+    "lint": "oxlint",
+    "format": "oxfmt --write .",
+    "format:check": "oxfmt --check ."
   }
 }
 ```
 
-Remove any pre-existing ESLint/Prettier configs.
+Remove any pre-existing ESLint/Prettier/Biome configs.
 
 Verify: `bun lint` and `bun format` work, typecheck passes.
 
-### Step 3: Configure Code Quality Tools
+### Step 3: Enable React Compiler
+
+Install the React Compiler babel plugin:
+
+```bash
+bun add -D babel-plugin-react-compiler
+```
+
+TanStack Start uses Vinxi (Vite-based) with `@vitejs/plugin-react`. Add the React Compiler plugin to `app.config.ts`:
+
+```typescript
+import { defineConfig } from "@tanstack/react-start/config";
+
+export default defineConfig({
+  react: {
+    babel: {
+      plugins: ["babel-plugin-react-compiler"],
+    },
+  },
+});
+```
+
+**Important:** The React Compiler babel plugin must run first in the babel pipeline. Verify optimization in React DevTools — optimized components show a "Memo" badge.
+
+Verify: `bun dev` starts without errors, typecheck passes.
+
+### Step 4: Configure Code Quality Tools
 
 Install jscpd (copy-paste detection) and react-doctor (React code health):
 
@@ -183,7 +207,7 @@ Add scripts:
 ```json
 {
   "scripts": {
-    "check:duplicates": "jscpd src convex",
+    "check:duplicates": "jscpd app convex",
     "check:health": "react-doctor"
   }
 }
@@ -191,7 +215,7 @@ Add scripts:
 
 Verify: Both commands run successfully, typecheck passes.
 
-### Step 4: Set Up Testing Framework
+### Step 5: Set Up Testing Framework
 
 Install Vitest for unit tests (may already be included by template):
 
@@ -215,7 +239,7 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      "@": fileURLToPath(new URL("./src", import.meta.url)),
+      "@": fileURLToPath(new URL("./app", import.meta.url)),
     },
   },
 });
@@ -252,7 +276,7 @@ Create `playwright.config.ts` and add script:
 
 Verify: `bun run test` passes, typecheck passes.
 
-### Step 5: Set Up Convex Auth (if requested)
+### Step 6: Set Up Convex Auth (if requested)
 
 Skip if user answered "No" to Convex Auth question.
 
@@ -268,7 +292,7 @@ Document required environment variables in `.env.example`.
 
 Verify: Auth flow works, typecheck passes.
 
-### Step 6: Set Up Convex Workflows (if requested)
+### Step 7: Set Up Convex Workflows (if requested)
 
 Skip if user answered "No" to Convex Workflows question.
 
@@ -282,7 +306,7 @@ Configure WorkflowManager in `convex/workflows/` with retry behavior.
 
 Verify: Typecheck passes.
 
-### Step 7: Configure AI Dependencies (if requested)
+### Step 8: Configure AI Dependencies (if requested)
 
 Skip if user answered "No" to AI integration question.
 
@@ -305,11 +329,12 @@ Verify: Typecheck passes.
   "scripts": {
     "dev": "vinxi dev",
     "build": "vinxi build",
-    "typecheck": "tsc --noEmit",
-    "lint": "biome check .",
-    "format": "biome format --write .",
-    "test": "vitest",
-    "check:duplicates": "jscpd src",
+    "typecheck": "tsgo --noEmit",
+    "lint": "oxlint",
+    "format": "oxfmt --write .",
+    "format:check": "oxfmt --check .",
+    "test": "vitest run",
+    "check:duplicates": "jscpd app",
     "check:health": "react-doctor"
   }
 }
@@ -323,7 +348,7 @@ Verify: Typecheck passes.
     "dev": "npm-run-all --parallel dev:frontend dev:backend",
     "dev:frontend": "vinxi dev",
     "dev:backend": "convex dev",
-    "check:duplicates": "jscpd src convex"
+    "check:duplicates": "jscpd app convex"
   }
 }
 ```
@@ -391,8 +416,9 @@ For detailed configuration examples and patterns:
 | Start dev servers | `bun dev` | |
 | Build for production | `bun run build` | |
 | Type check | `bun run typecheck` | |
-| Lint code | `bun lint` | |
-| Format code | `bun format` | |
+| Lint code | `bun lint` | oxlint |
+| Format code | `bun format` | oxfmt |
+| Check formatting | `bun run format:check` | CI-friendly |
 | Run unit tests | `bun run test` | Use `bun run test`, NOT `bun test` |
 | Run E2E tests | `bun run test:e2e` | If E2E enabled |
 | Check duplicates | `bun run check:duplicates` | |

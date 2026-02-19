@@ -11,7 +11,7 @@ Full-stack React framework with file-based routing and SSR.
 - Built-in devtools for debugging
 - Powered by Vinxi (Vite-based)
 
-**CLI:** `bun create @tanstack/start@latest`
+**CLI:** `bunx @tanstack/cli create`
 
 ### React
 
@@ -91,23 +91,50 @@ JavaScript runtime and package manager.
 - `bun add -D <pkg>` - Add dev dependency
 - `bun run <script>` - Run package.json script
 
-### Biome
+### oxfmt
 
-Fast linter and formatter (replaces ESLint + Prettier).
+Rust-powered JavaScript/TypeScript formatter from the oxc project. Prettier-compatible with built-in import sorting and Tailwind CSS class sorting.
 
-**Configuration:** `biome.json`
+**Configuration:** `.oxfmtrc.jsonc`
 
-**Note:** Enable `css.parser.tailwindDirectives: true` for Tailwind v4 syntax support.
+**Key Features:**
+- Default `printWidth: 100` (better for TypeScript than Prettier's 80)
+- Built-in import sorting (`experimentalSortImports`)
+- Built-in Tailwind class sorting (`experimentalTailwindcss`)
+- Reads `.editorconfig` properties
 
-### TypeScript
+### oxlint
 
-Strict TypeScript configuration.
+Rust-powered JavaScript/TypeScript linter from the oxc project. 50-100x faster than ESLint.
+
+**Configuration:** `oxlint.config.ts` (TypeScript config file with `defineConfig`)
+
+**Key Features:**
+- @nkzw/oxlint-config provides strict, opinionated defaults
+- ESLint plugins can be used via `jsPlugins` field (https://oxc.rs/docs/guide/usage/linter/js-plugins.html)
+- Reserved plugin names (react, import, jest, typescript) need aliases for JS versions
+- Type-aware linting with `--type-aware --type-check`
+
+### tsgo (TypeScript Native)
+
+Native TypeScript compiler (~10x faster than tsc). Drop-in replacement.
+
+**Package:** `@typescript/native-preview`
+**Command:** `tsgo --noEmit` (replaces `tsc --noEmit`)
 
 **Key Settings:**
 - `strict: true`
 - `noUnusedLocals: true`
 - `noUnusedParameters: true`
-- Path aliases (`@/*` → `./app/*`)
+- Path aliases (e.g. `@/*` → `./app/*`)
+
+### React Compiler
+
+Automatically optimizes React components by memoizing values and callbacks. Eliminates manual `useMemo`, `useCallback`, and `React.memo`.
+
+**Package:** `babel-plugin-react-compiler`
+**Configuration:** Add to babel plugins in `app.config.ts` (TanStack Start) or `vite.config.ts` (Vite)
+**Verification:** Optimized components show "Memo" badge in React DevTools
 
 ## Testing
 
