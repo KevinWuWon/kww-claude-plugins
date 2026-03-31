@@ -18,7 +18,7 @@ Build production-ready web applications using TanStack Start with Convex backend
 | Workflows | Convex Workflows (optional, requires Convex) |
 | UI Components | shadcn/ui (Base UI primitives) |
 | Styling | Tailwind CSS |
-| Package Manager | Bun |
+| Package Manager | pnpm |
 | Linting | oxlint + @nkzw/oxlint-config |
 | Formatting | oxfmt |
 | Type Checking | tsgo (@typescript/native-preview) |
@@ -61,35 +61,35 @@ Follow these steps in order. Each step should pass typecheck before proceeding.
 **With Convex (data persistence needed):**
 
 ```bash
-bunx @tanstack/cli create <project-name> --add-ons convex,shadcn
+pnpm dlx @tanstack/cli create <project-name> --add-ons convex,shadcn
 ```
 
 **Without Convex (no data persistence):**
 
 ```bash
-bunx @tanstack/cli create <project-name> --add-ons shadcn
+pnpm dlx @tanstack/cli create <project-name> --add-ons shadcn
 ```
 
 **Important Notes:**
 - The CLI creates a subdirectory with the project name. If you're already in the target directory, you may need to move files up: `mv <project-name>/* <project-name>/.[!.]* . && rmdir <project-name>`
-- Use `bunx @tanstack/cli create` (NOT `create-tanstack-app` which creates TanStack Router SPA, not TanStack Start SSR)
+- Use `pnpm dlx @tanstack/cli create` (NOT `create-tanstack-app` which creates TanStack Router SPA, not TanStack Start SSR)
 - After project creation, reinitialize shadcn with Base UI primitives (replaces Radix UI):
 
 ```bash
-bunx shadcn@latest init --style base-ui-tw
+pnpm dlx shadcn@latest init --style base-ui-tw
 ```
 
 This reconfigures the shadcn setup to use `@base-ui-components/react` instead of `@radix-ui/*` packages. Remove any lingering `@radix-ui/*` dependencies afterward.
 
 Verify:
-- `bun dev` starts the dev server (and Convex if enabled)
+- `pnpm dev` starts the dev server (and Convex if enabled)
 - Basic route renders at localhost:3000
-- `bun run typecheck` passes (add script if missing: `"typecheck": "tsgo --noEmit"`)
+- `pnpm typecheck` passes (add script if missing: `"typecheck": "tsgo --noEmit"`)
 
 **Install tsgo** (native TypeScript compiler, ~10x faster than tsc):
 
 ```bash
-bun add -D @typescript/native-preview
+pnpm add -D @typescript/native-preview
 ```
 
 ### Step 2: Configure oxfmt + oxlint
@@ -97,7 +97,7 @@ bun add -D @typescript/native-preview
 Install oxfmt (formatter) and oxlint (linter) with the @nkzw/oxlint-config shared config:
 
 ```bash
-bun add -D oxfmt oxlint @nkzw/oxlint-config
+pnpm add -D oxfmt oxlint @nkzw/oxlint-config
 ```
 
 **Configure oxfmt** — create `.oxfmtrc.jsonc`:
@@ -154,14 +154,14 @@ Add scripts to `package.json`:
 
 Remove any pre-existing ESLint/Prettier/Biome configs.
 
-Verify: `bun lint` and `bun format` work, typecheck passes.
+Verify: `pnpm lint` and `pnpm format` work, typecheck passes.
 
 ### Step 3: Enable React Compiler
 
 Install the React Compiler babel plugin:
 
 ```bash
-bun add -D babel-plugin-react-compiler
+pnpm add -D babel-plugin-react-compiler
 ```
 
 TanStack Start uses Vinxi (Vite-based) with `@vitejs/plugin-react`. Add the React Compiler plugin to `app.config.ts`:
@@ -180,14 +180,14 @@ export default defineConfig({
 
 **Important:** The React Compiler babel plugin must run first in the babel pipeline. Verify optimization in React DevTools — optimized components show a "Memo" badge.
 
-Verify: `bun dev` starts without errors, typecheck passes.
+Verify: `pnpm dev` starts without errors, typecheck passes.
 
 ### Step 4: Configure Code Quality Tools
 
 Install jscpd (copy-paste detection) and react-doctor (React code health):
 
 ```bash
-bun add -D jscpd react-doctor
+pnpm add -D jscpd react-doctor
 ```
 
 Create `jscpd.json`:
@@ -204,7 +204,7 @@ Create `jscpd.json`:
 Install temporal-polyfill for date/time handling:
 
 ```bash
-bun add temporal-polyfill
+pnpm add temporal-polyfill
 ```
 
 This provides the TC39 Temporal API polyfill — use `Temporal.PlainDate`, `Temporal.ZonedDateTime`, `Temporal.Duration`, etc. instead of date-fns/dayjs/moment.
@@ -227,7 +227,7 @@ Verify: Both commands run successfully, typecheck passes.
 Install Vitest for unit tests (may already be included by template):
 
 ```bash
-bun add -D vitest @vitest/ui @testing-library/react @testing-library/dom jsdom
+pnpm add -D vitest @vitest/ui @testing-library/react @testing-library/dom jsdom
 ```
 
 **Create `vitest.config.ts`** (required for jsdom environment):
@@ -262,13 +262,13 @@ Add scripts:
 }
 ```
 
-**Important:** Use `bun run test` (not `bun test`) to run the npm script. `bun test` invokes Bun's native test runner instead.
+**Important:** Use `pnpm test` to run Vitest.
 
 **If E2E testing requested**, also install Playwright:
 
 ```bash
-bun add -D @playwright/test
-bunx playwright install chromium
+pnpm add -D @playwright/test
+pnpm dlx playwright install chromium
 ```
 
 Create `playwright.config.ts` and add script:
@@ -281,7 +281,7 @@ Create `playwright.config.ts` and add script:
 }
 ```
 
-Verify: `bun run test` passes, typecheck passes.
+Verify: `pnpm test` passes, typecheck passes.
 
 ### Step 6: Set Up Convex Auth (if requested)
 
@@ -320,7 +320,7 @@ Skip if user answered "No" to AI integration question.
 Install Vercel AI SDK with providers:
 
 ```bash
-bun add ai @ai-sdk/google
+pnpm add ai @ai-sdk/google
 ```
 
 Document API key environment variables.
@@ -352,7 +352,7 @@ Verify: Typecheck passes.
 ```json
 {
   "scripts": {
-    "dev": "npm-run-all --parallel dev:frontend dev:backend",
+    "dev": "pnpm run --parallel dev:frontend dev:backend",
     "dev:frontend": "vinxi dev",
     "dev:backend": "convex dev",
     "check:duplicates": "jscpd app convex"
@@ -420,14 +420,14 @@ For detailed configuration examples and patterns:
 
 | Task | Command | Notes |
 |------|---------|-------|
-| Start dev servers | `bun dev` | |
-| Build for production | `bun run build` | |
-| Type check | `bun run typecheck` | |
-| Lint code | `bun lint` | oxlint |
-| Format code | `bun format` | oxfmt |
-| Check formatting | `bun run format:check` | CI-friendly |
-| Run unit tests | `bun run test` | Use `bun run test`, NOT `bun test` |
-| Run E2E tests | `bun run test:e2e` | If E2E enabled |
-| Check duplicates | `bun run check:duplicates` | |
-| Check code health | `bun run check:health` | |
+| Start dev servers | `pnpm dev` | |
+| Build for production | `pnpm build` | |
+| Type check | `pnpm typecheck` | |
+| Lint code | `pnpm lint` | oxlint |
+| Format code | `pnpm format` | oxfmt |
+| Check formatting | `pnpm format:check` | CI-friendly |
+| Run unit tests | `pnpm test` | Use `pnpm test`, NOT `pnpm test` |
+| Run E2E tests | `pnpm test:e2e` | If E2E enabled |
+| Check duplicates | `pnpm check:duplicates` | |
+| Check code health | `pnpm check:health` | |
 | Deploy Convex | `npx convex deploy` | If Convex enabled |

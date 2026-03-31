@@ -11,7 +11,7 @@ Full-stack React framework with file-based routing and SSR.
 - Built-in devtools for debugging
 - Powered by Vinxi (Vite-based)
 
-**CLI:** `bunx @tanstack/cli create`
+**CLI:** `pnpm dlx @tanstack/cli create`
 
 ### React
 
@@ -65,9 +65,9 @@ Headless component library using Base UI primitives instead of Radix UI.
 - `@base-ui-components/react` as the primitive layer (replaces `@radix-ui/*`)
 - Tailwind CSS styling
 
-**Setup:** After `bunx @tanstack/cli create`, reinitialize with Base UI style:
+**Setup:** After `pnpm dlx @tanstack/cli create`, reinitialize with Base UI style:
 ```bash
-bunx shadcn@latest init --style base-ui-tw
+pnpm dlx shadcn@latest init --style base-ui-tw
 ```
 Remove any `@radix-ui/*` packages that the TanStack CLI may have installed.
 
@@ -87,15 +87,15 @@ Utility-first CSS framework.
 
 ## Development Tools
 
-### Bun
+### pnpm
 
-JavaScript runtime and package manager.
+Fast, disk-space-efficient package manager.
 
 **Commands:**
-- `bun install` - Install dependencies
-- `bun add <pkg>` - Add dependency
-- `bun add -D <pkg>` - Add dev dependency
-- `bun run <script>` - Run package.json script
+- `pnpm install` - Install dependencies
+- `pnpm add <pkg>` - Add dependency
+- `pnpm add -D <pkg>` - Add dev dependency
+- `pnpm run <script>` - Run package.json script
 
 ### oxfmt
 

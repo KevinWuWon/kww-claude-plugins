@@ -7,44 +7,44 @@ Detailed acceptance criteria for each setup step.
 **With Convex (data persistence needed):**
 
 ```bash
-bunx @tanstack/cli create <project-name> --add-ons convex,shadcn
+pnpm dlx @tanstack/cli create <project-name> --add-ons convex,shadcn
 ```
 
 **Without Convex (no data persistence):**
 
 ```bash
-bunx @tanstack/cli create <project-name> --add-ons shadcn
+pnpm dlx @tanstack/cli create <project-name> --add-ons shadcn
 ```
 
 **Important:**
-- Use `bunx @tanstack/cli create` (NOT `create-tanstack-app` which creates TanStack Router SPA, not TanStack Start SSR)
+- Use `pnpm dlx @tanstack/cli create` (NOT `create-tanstack-app` which creates TanStack Router SPA, not TanStack Start SSR)
 - The CLI creates a subdirectory. If already in target directory, move files up:
   ```bash
   mv <project-name>/* <project-name>/.[!.]* . && rmdir <project-name>
   ```
 - After project creation, reinitialize shadcn with Base UI primitives:
   ```bash
-  bunx shadcn@latest init --style base-ui-tw
+  pnpm dlx shadcn@latest init --style base-ui-tw
   ```
   Then remove lingering Radix packages:
   ```bash
-  bun remove $(bun pm ls | grep @radix-ui | awk '{print $1}')
+  pnpm remove $(pnpm ls --depth=0 | grep @radix-ui | awk '{print $1}')
   ```
 
 **Acceptance Criteria:**
 - [ ] Project created with TanStack Start and selected add-ons
 - [ ] shadcn reinitialized with `--style base-ui-tw` (`@base-ui-components/react` installed)
 - [ ] No `@radix-ui/*` packages in `package.json`
-- [ ] `bun dev` starts the dev server (and Convex if enabled)
+- [ ] `pnpm dev` starts the dev server (and Convex if enabled)
 - [ ] Basic route renders at localhost:3000
-- [ ] `@typescript/native-preview` installed (`bun add -D @typescript/native-preview`)
-- [ ] `bun run typecheck` passes (add `"typecheck": "tsgo --noEmit"` if missing)
+- [ ] `@typescript/native-preview` installed (`pnpm add -D @typescript/native-preview`)
+- [ ] `pnpm typecheck` passes (add `"typecheck": "tsgo --noEmit"` if missing)
 
 ## Step 2: Configure oxfmt + oxlint
 
 **Commands:**
 ```bash
-bun add -D oxfmt oxlint @nkzw/oxlint-config
+pnpm add -D oxfmt oxlint @nkzw/oxlint-config
 ```
 
 **Configure oxfmt** — create `.oxfmtrc.jsonc`:
@@ -85,8 +85,8 @@ export default defineConfig({
 - [ ] oxfmt and oxlint installed
 - [ ] `.oxfmtrc.jsonc` configured with Tailwind class sorting
 - [ ] `oxlint.config.ts` configured with @nkzw/oxlint-config
-- [ ] `bun lint` runs oxlint
-- [ ] `bun format` runs oxfmt
+- [ ] `pnpm lint` runs oxlint
+- [ ] `pnpm format` runs oxfmt
 - [ ] Pre-existing ESLint/Prettier/Biome configs removed
 - [ ] Typecheck passes
 
@@ -103,7 +103,7 @@ export default defineConfig({
 
 **Commands:**
 ```bash
-bun add -D babel-plugin-react-compiler
+pnpm add -D babel-plugin-react-compiler
 ```
 
 **Configure in `app.config.ts`:**
@@ -127,7 +127,7 @@ export default defineConfig({
 **Acceptance Criteria:**
 - [ ] `babel-plugin-react-compiler` installed
 - [ ] React Compiler configured in `app.config.ts`
-- [ ] `bun dev` starts without errors
+- [ ] `pnpm dev` starts without errors
 - [ ] Optimized components show "Memo" badge in React DevTools
 - [ ] Typecheck passes
 
@@ -135,12 +135,12 @@ export default defineConfig({
 
 **Commands:**
 ```bash
-bun add -D jscpd react-doctor
+pnpm add -D jscpd react-doctor
 ```
 
 Install temporal-polyfill for date/time handling:
 ```bash
-bun add temporal-polyfill
+pnpm add temporal-polyfill
 ```
 
 **Acceptance Criteria:**
@@ -148,8 +148,8 @@ bun add temporal-polyfill
 - [ ] react-doctor installed
 - [ ] temporal-polyfill installed
 - [ ] `jscpd.json` configured for TypeScript/TSX files
-- [ ] `bun run check:duplicates` runs jscpd
-- [ ] `bun run check:health` runs react-doctor
+- [ ] `pnpm check:duplicates` runs jscpd
+- [ ] `pnpm check:health` runs react-doctor
 - [ ] Typecheck passes
 
 **jscpd.json example:**
@@ -184,7 +184,7 @@ Without Convex:
 
 **Commands:**
 ```bash
-bun add -D vitest @vitest/ui @testing-library/react @testing-library/dom jsdom
+pnpm add -D vitest @vitest/ui @testing-library/react @testing-library/dom jsdom
 ```
 
 **Create `vitest.config.ts`** (required for jsdom environment):
@@ -210,16 +210,14 @@ export default defineConfig({
 
 **If E2E testing requested:**
 ```bash
-bun add -D @playwright/test
-bunx playwright install chromium
+pnpm add -D @playwright/test
+pnpm dlx playwright install chromium
 ```
-
-**Important:** Use `bun run test` (NOT `bun test`) - the latter invokes Bun's native test runner.
 
 **Acceptance Criteria:**
 - [ ] Vitest installed
 - [ ] `vitest.config.ts` created with jsdom environment
-- [ ] `bun run test` runs Vitest (not Bun's test runner)
+- [ ] `pnpm test` runs Vitest
 - [ ] Playwright installed (if E2E requested)
 - [ ] `playwright.config.ts` configured (if E2E requested)
 - [ ] Sample test passes
@@ -272,13 +270,13 @@ npx convex component add @convex-dev/workflow
 
 **Commands:**
 ```bash
-bun add ai @ai-sdk/google
+pnpm add ai @ai-sdk/google
 ```
 
 Or other providers:
 ```bash
-bun add @ai-sdk/openai
-bun add @ai-sdk/anthropic
+pnpm add @ai-sdk/openai
+pnpm add @ai-sdk/anthropic
 ```
 
 **Acceptance Criteria:**
@@ -297,7 +295,7 @@ bun add @ai-sdk/anthropic
 ```json
 {
   "scripts": {
-    "dev": "npm-run-all --parallel dev:frontend dev:backend",
+    "dev": "pnpm run --parallel dev:frontend dev:backend",
     "dev:frontend": "vinxi dev",
     "dev:backend": "convex dev",
     "build": "vinxi build",
@@ -311,11 +309,6 @@ bun add @ai-sdk/anthropic
     "check:health": "react-doctor"
   }
 }
-```
-
-Note: Install `npm-run-all` for parallel dev servers:
-```bash
-bun add -D npm-run-all
 ```
 
 **Without Convex:**
@@ -342,13 +335,13 @@ bun add -D npm-run-all
 Run through these commands to verify setup is complete:
 
 ```bash
-bun dev                    # Dev server(s) start
-bun run typecheck          # No type errors
-bun lint                   # No lint errors
-bun format                 # Format all files
-bun run format:check       # Verify formatting (CI)
-bun run test               # Unit tests pass (use 'bun run test', NOT 'bun test')
-bun run test:e2e           # E2E tests pass (if E2E enabled)
-bun run check:duplicates   # No problematic duplicates
-bun run check:health       # No code health issues
+pnpm dev                    # Dev server(s) start
+pnpm typecheck          # No type errors
+pnpm lint                   # No lint errors
+pnpm format                 # Format all files
+pnpm format:check       # Verify formatting (CI)
+pnpm test               # Unit tests pass
+pnpm test:e2e           # E2E tests pass (if E2E enabled)
+pnpm check:duplicates   # No problematic duplicates
+pnpm check:health       # No code health issues
 ```
