@@ -1,228 +1,165 @@
 #!/usr/bin/env python3
+# /// script
+# requires-python = ">=3.10"
+# dependencies = [
+#     "google-genai>=1.0.0",
+#     "pillow>=10.0.0",
+# ]
+# ///
 """
-Image generation script using Nano Banana (Google Gemini Image API).
+Generate images using Google's Nano Banana Pro (Gemini 3 Pro Image) API.
 
-Supports text-to-image and image-to-image generation with configurable options.
+Usage:
+    uv run generate_image.py --prompt "your image description" --filename "output.png" [--resolution 1K|2K|4K] [--api-key KEY]
 """
 
 import argparse
-import base64
 import os
 import sys
-from io import BytesIO
 from pathlib import Path
 
-from PIL import Image
+
+def get_api_key(provided_key: str | None) -> str | None:
+    """Get API key from argument first, then environment."""
+    if provided_key:
+        return provided_key
+    return os.environ.get("GEMINI_API_KEY")
 
 
-def load_image_as_base64(image_path: str) -> tuple[str, str]:
-    """Load an image file and return base64 data and mime type."""
-    path = Path(image_path)
-    if not path.exists():
-        raise FileNotFoundError(f"Image not found: {image_path}")
-
-    # Determine mime type from extension
-    ext = path.suffix.lower()
-    mime_types = {
-        ".png": "image/png",
-        ".jpg": "image/jpeg",
-        ".jpeg": "image/jpeg",
-        ".gif": "image/gif",
-        ".webp": "image/webp",
-    }
-    mime_type = mime_types.get(ext, "image/png")
-
-    with open(image_path, "rb") as f:
-        data = base64.b64encode(f.read()).decode("utf-8")
-
-    return data, mime_type
-
-
-def generate_image(
-    prompt: str,
-    output_path: str,
-    model: str = "gemini-3-pro-image-preview",
-    input_image: str | None = None,
-    aspect_ratio: str | None = None,  # noqa: ARG001
-    num_images: int = 1,
-) -> list[str]:
-    """
-    Generate image(s) using Google Gemini / Nano Banana API.
-
-    Args:
-        prompt: Text description for image generation.
-        output_path: Path to save the generated image(s).
-        model: Model ID to use for generation.
-        input_image: Optional path to reference image for image-to-image mode.
-        aspect_ratio: Aspect ratio (e.g., "1:1", "16:9", "9:16", "4:3", "3:4").
-        num_images: Number of images to generate.
-
-    Returns:
-        List of paths to saved images.
-    """
-    api_key = os.environ.get("GEMINI_API_KEY") or os.environ.get("GENAI_API_KEY")
-    if not api_key:
-        raise ValueError(
-            "API key not found. Set GEMINI_API_KEY or GENAI_API_KEY environment variable."
-        )
-
-    # lazy importing since very heavy libs
-    from google import genai
-    from google.genai import types
-
-    client = genai.Client(api_key=api_key)
-
-    # Build content parts
-    parts: list[types.Part] = []
-
-    # Add reference image if provided (image-to-image mode)
-    if input_image:
-        img_data, mime_type = load_image_as_base64(input_image)
-        parts.append(
-            types.Part.from_bytes(
-                data=base64.b64decode(img_data),
-                mime_type=mime_type,
-            )
-        )
-
-    # Add text prompt
-    parts.append(types.Part.from_text(text=prompt))
-
-    # Build generation config
-    generate_config = types.GenerateContentConfig(
-        response_modalities=["TEXT", "IMAGE"],
-    )
-
-    saved_paths: list[str] = []
-    output_dir = Path(output_path).parent
-    output_dir.mkdir(parents=True, exist_ok=True)
-
-    base_name = Path(output_path).stem
-    extension = Path(output_path).suffix or ".png"
-
-    for i in range(num_images):
-        response = client.models.generate_content(
-            model=model,
-            contents=types.Content(parts=parts),
-            config=generate_config,
-        )
-
-        # Validate response
-        if not response.candidates:
-            raise ValueError("No candidates returned from the API")
-
-        candidate = response.candidates[0]
-        if not candidate.content or not candidate.content.parts:
-            raise ValueError("No content parts returned from the API")
-
-        # Process response parts
-        image_count = 0
-        for part in candidate.content.parts:
-            if part.inline_data is not None and part.inline_data.data is not None:
-                # Extract and save the image
-                image_data = part.inline_data.data
-                image = Image.open(BytesIO(image_data))
-
-                # Generate output filename
-                if num_images == 1 and image_count == 0:
-                    save_path = output_path
-                else:
-                    save_path = str(
-                        output_dir / f"{base_name}_{i + 1}_{image_count + 1}{extension}"
-                    )
-
-                image.save(save_path)
-                saved_paths.append(save_path)
-                print(f"Saved: {save_path}")
-                image_count += 1
-            elif part.text:
-                # Print any text response from the model
-                print(f"Model response: {part.text}")
-
-    return saved_paths
-
-
-def main() -> None:
-    """Main entry point for CLI usage."""
+def main():
     parser = argparse.ArgumentParser(
-        description="Generate images using Nano Banana (Google Gemini Image API).",
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="""
-Examples:
-  # Basic text-to-image generation
-  python generate.py --prompt "A futuristic city at sunset" --output city.png
-
-  # Generate with specific aspect ratio
-  python generate.py --prompt "Mountain landscape" --output landscape.png --aspect-ratio 16:9
-
-  # Image-to-image mode (use reference image)
-  python generate.py --prompt "Make it more colorful" --input-image ref.png --output colorful.png
-
-  # Generate multiple images
-  python generate.py --prompt "Abstract art" --output art.png --num-images 3
-""",
+        description="Generate images using Nano Banana Pro (Gemini 3 Pro Image)"
     )
-
     parser.add_argument(
-        "--prompt",
-        "-p",
-        type=str,
+        "--prompt", "-p",
         required=True,
-        help="Text prompt describing the desired image.",
+        help="Image description/prompt"
     )
     parser.add_argument(
-        "--output",
-        "-o",
-        type=str,
-        default="output.png",
-        help="Output path for the generated image (default: output.png).",
+        "--filename", "-f",
+        required=True,
+        help="Output filename (e.g., sunset-mountains.png)"
     )
     parser.add_argument(
-        "--model",
-        "-m",
-        type=str,
-        default="gemini-3-pro-image-preview",
-        help="Model to use (default: gemini-3-pro-image-preview).",
+        "--input-image", "-i",
+        help="Optional input image path for editing/modification"
     )
     parser.add_argument(
-        "--input-image",
-        "-i",
-        type=str,
-        help="Path to reference image for image-to-image generation.",
+        "--resolution", "-r",
+        choices=["1K", "2K", "4K"],
+        default="1K",
+        help="Output resolution: 1K (default), 2K, or 4K"
     )
     parser.add_argument(
-        "--aspect-ratio",
-        "-a",
-        type=str,
-        choices=["1:1", "16:9", "9:16", "4:3", "3:4"],
-        help="Aspect ratio for the generated image.",
-    )
-    parser.add_argument(
-        "--num-images",
-        "-n",
-        type=int,
-        default=1,
-        help="Number of images to generate (default: 1).",
+        "--api-key", "-k",
+        help="Gemini API key (overrides GEMINI_API_KEY env var)"
     )
 
     args = parser.parse_args()
 
+    # Get API key
+    api_key = get_api_key(args.api_key)
+    if not api_key:
+        print("Error: No API key provided.", file=sys.stderr)
+        print("Please either:", file=sys.stderr)
+        print("  1. Provide --api-key argument", file=sys.stderr)
+        print("  2. Set GEMINI_API_KEY environment variable", file=sys.stderr)
+        sys.exit(1)
+
+    # Import here after checking API key to avoid slow import on error
+    from google import genai
+    from google.genai import types
+    from PIL import Image as PILImage
+
+    # Initialise client
+    client = genai.Client(api_key=api_key)
+
+    # Set up output path
+    output_path = Path(args.filename)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+
+    # Load input image if provided
+    input_image = None
+    output_resolution = args.resolution
+    if args.input_image:
+        try:
+            input_image = PILImage.open(args.input_image)
+            print(f"Loaded input image: {args.input_image}")
+
+            # Auto-detect resolution if not explicitly set by user
+            if args.resolution == "1K":  # Default value
+                # Map input image size to resolution
+                width, height = input_image.size
+                max_dim = max(width, height)
+                if max_dim >= 3000:
+                    output_resolution = "4K"
+                elif max_dim >= 1500:
+                    output_resolution = "2K"
+                else:
+                    output_resolution = "1K"
+                print(f"Auto-detected resolution: {output_resolution} (from input {width}x{height})")
+        except Exception as e:
+            print(f"Error loading input image: {e}", file=sys.stderr)
+            sys.exit(1)
+
+    # Build contents (image first if editing, prompt only if generating)
+    if input_image:
+        contents = [input_image, args.prompt]
+        print(f"Editing image with resolution {output_resolution}...")
+    else:
+        contents = args.prompt
+        print(f"Generating image with resolution {output_resolution}...")
+
     try:
-        saved_paths = generate_image(
-            prompt=args.prompt,
-            output_path=args.output,
-            model=args.model,
-            input_image=args.input_image,
-            aspect_ratio=args.aspect_ratio,
-            num_images=args.num_images,
+        response = client.models.generate_content(
+            model="gemini-3-pro-image-preview",
+            contents=contents,
+            config=types.GenerateContentConfig(
+                response_modalities=["TEXT", "IMAGE"],
+                image_config=types.ImageConfig(
+                    image_size=output_resolution
+                )
+            )
         )
 
-        print(f"\nSuccessfully generated {len(saved_paths)} image(s):")
-        for path in saved_paths:
-            print(f"  - {path}")
+        # Process response and convert to PNG
+        image_saved = False
+        for part in response.parts:
+            if part.text is not None:
+                print(f"Model response: {part.text}")
+            elif part.inline_data is not None:
+                # Convert inline data to PIL Image and save as PNG
+                from io import BytesIO
+
+                # inline_data.data is already bytes, not base64
+                image_data = part.inline_data.data
+                if isinstance(image_data, str):
+                    # If it's a string, it might be base64
+                    import base64
+                    image_data = base64.b64decode(image_data)
+
+                image = PILImage.open(BytesIO(image_data))
+
+                # Ensure RGB mode for PNG (convert RGBA to RGB with white background if needed)
+                if image.mode == 'RGBA':
+                    rgb_image = PILImage.new('RGB', image.size, (255, 255, 255))
+                    rgb_image.paste(image, mask=image.split()[3])
+                    rgb_image.save(str(output_path), 'PNG')
+                elif image.mode == 'RGB':
+                    image.save(str(output_path), 'PNG')
+                else:
+                    image.convert('RGB').save(str(output_path), 'PNG')
+                image_saved = True
+
+        if image_saved:
+            full_path = output_path.resolve()
+            print(f"\nImage saved: {full_path}")
+        else:
+            print("Error: No image was generated in the response.", file=sys.stderr)
+            sys.exit(1)
 
     except Exception as e:
-        print(f"Error: {e}", file=sys.stderr)
+        print(f"Error generating image: {e}", file=sys.stderr)
         sys.exit(1)
 
 
