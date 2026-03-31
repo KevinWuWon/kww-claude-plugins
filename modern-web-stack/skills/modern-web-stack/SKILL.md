@@ -16,7 +16,7 @@ Build production-ready web applications using TanStack Start with Convex backend
 | Backend | Convex (optional) |
 | Auth | Convex Auth (optional, requires Convex) |
 | Workflows | Convex Workflows (optional, requires Convex) |
-| UI Components | shadcn/ui |
+| UI Components | shadcn/ui (Base UI primitives) |
 | Styling | Tailwind CSS |
 | Package Manager | Bun |
 | Linting | oxlint + @nkzw/oxlint-config |
@@ -73,6 +73,13 @@ bunx @tanstack/cli create <project-name> --add-ons shadcn
 **Important Notes:**
 - The CLI creates a subdirectory with the project name. If you're already in the target directory, you may need to move files up: `mv <project-name>/* <project-name>/.[!.]* . && rmdir <project-name>`
 - Use `bunx @tanstack/cli create` (NOT `create-tanstack-app` which creates TanStack Router SPA, not TanStack Start SSR)
+- After project creation, reinitialize shadcn with Base UI primitives (replaces Radix UI):
+
+```bash
+bunx shadcn@latest init --style base-ui-tw
+```
+
+This reconfigures the shadcn setup to use `@base-ui-components/react` instead of `@radix-ui/*` packages. Remove any lingering `@radix-ui/*` dependencies afterward.
 
 Verify:
 - `bun dev` starts the dev server (and Convex if enabled)

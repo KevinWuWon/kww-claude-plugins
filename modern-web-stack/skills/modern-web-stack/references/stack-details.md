@@ -57,13 +57,19 @@ TanStack Start provides server functions for API calls without a database:
 
 ## UI Layer
 
-### shadcn/ui
+### shadcn/ui (Base UI)
 
-Headless component library built on Radix UI primitives.
+Headless component library using Base UI primitives instead of Radix UI.
 
 - Copy-paste components (you own the code)
-- Accessible Radix UI primitives
+- `@base-ui-components/react` as the primitive layer (replaces `@radix-ui/*`)
 - Tailwind CSS styling
+
+**Setup:** After `bunx @tanstack/cli create`, reinitialize with Base UI style:
+```bash
+bunx shadcn@latest init --style base-ui-tw
+```
+Remove any `@radix-ui/*` packages that the TanStack CLI may have installed.
 
 **Key Utilities:**
 - `class-variance-authority` (CVA) for variant management

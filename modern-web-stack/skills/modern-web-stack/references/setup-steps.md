@@ -22,9 +22,19 @@ bunx @tanstack/cli create <project-name> --add-ons shadcn
   ```bash
   mv <project-name>/* <project-name>/.[!.]* . && rmdir <project-name>
   ```
+- After project creation, reinitialize shadcn with Base UI primitives:
+  ```bash
+  bunx shadcn@latest init --style base-ui-tw
+  ```
+  Then remove lingering Radix packages:
+  ```bash
+  bun remove $(bun pm ls | grep @radix-ui | awk '{print $1}')
+  ```
 
 **Acceptance Criteria:**
 - [ ] Project created with TanStack Start and selected add-ons
+- [ ] shadcn reinitialized with `--style base-ui-tw` (`@base-ui-components/react` installed)
+- [ ] No `@radix-ui/*` packages in `package.json`
 - [ ] `bun dev` starts the dev server (and Convex if enabled)
 - [ ] Basic route renders at localhost:3000
 - [ ] `@typescript/native-preview` installed (`bun add -D @typescript/native-preview`)
