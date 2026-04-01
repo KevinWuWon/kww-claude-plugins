@@ -68,13 +68,12 @@ def main():
         print("  2. Set GEMINI_API_KEY environment variable", file=sys.stderr)
         sys.exit(1)
 
-    # If running under a TLS proxy (e.g. sfw), SSL_CERT_FILE points to the proxy's
-    # CA cert. httpx (used by google-genai) doesn't pick this up automatically, so
-    # we merge it with certifi's bundle and point httpx at the combined file.
+    # If running under a TLS proxy (e.g. sfw), SSL_CERT_FILE points to only the
+    # proxy's CA cert. Merge it with certifi's full bundle so all HTTPS calls trust
+    # both the proxy and real CAs.
     ssl_cert_file = os.environ.get("SSL_CERT_FILE")
     if ssl_cert_file and Path(ssl_cert_file).exists():
         import certifi
-        import httpx
         import tempfile
         combined = tempfile.NamedTemporaryFile(suffix=".pem", delete=False, mode="wb")
         with open(certifi.where(), "rb") as f:
@@ -82,11 +81,8 @@ def main():
         with open(ssl_cert_file, "rb") as f:
             combined.write(f.read())
         combined.close()
-        http_client = httpx.Client(verify=combined.name)
-        http_async_client = httpx.AsyncClient(verify=combined.name)
-    else:
-        http_client = None
-        http_async_client = None
+        os.environ["SSL_CERT_FILE"] = combined.name
+        os.environ["REQUESTS_CA_BUNDLE"] = combined.name
 
     # Import here after checking API key to avoid slow import on error
     from google import genai
@@ -94,11 +90,7 @@ def main():
     from PIL import Image as PILImage
 
     # Initialise client
-    client_kwargs = {"api_key": api_key}
-    if http_client:
-        client_kwargs["http_client"] = http_client
-        client_kwargs["http_async_client"] = http_async_client
-    client = genai.Client(**client_kwargs)
+    client = genai.Client(api_key=api_key)
 
     # Set up output path
     output_path = Path(args.filename)
