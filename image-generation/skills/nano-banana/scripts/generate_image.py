@@ -4,6 +4,8 @@
 # dependencies = [
 #     "google-genai>=1.0.0",
 #     "pillow>=10.0.0",
+#     "certifi>=2024.0.0",
+#     "httpx>=0.27.0",
 # ]
 # ///
 """
@@ -23,7 +25,7 @@ def get_api_key(provided_key: str | None) -> str | None:
     """Get API key from argument first, then environment."""
     if provided_key:
         return provided_key
-    return os.environ.get("GEMINI_API_KEY")
+    return os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
 
 
 def main():
@@ -66,13 +68,37 @@ def main():
         print("  2. Set GEMINI_API_KEY environment variable", file=sys.stderr)
         sys.exit(1)
 
+    # If running under a TLS proxy (e.g. sfw), SSL_CERT_FILE points to the proxy's
+    # CA cert. httpx (used by google-genai) doesn't pick this up automatically, so
+    # we merge it with certifi's bundle and point httpx at the combined file.
+    ssl_cert_file = os.environ.get("SSL_CERT_FILE")
+    if ssl_cert_file and Path(ssl_cert_file).exists():
+        import certifi
+        import httpx
+        import tempfile
+        combined = tempfile.NamedTemporaryFile(suffix=".pem", delete=False, mode="wb")
+        with open(certifi.where(), "rb") as f:
+            combined.write(f.read())
+        with open(ssl_cert_file, "rb") as f:
+            combined.write(f.read())
+        combined.close()
+        http_client = httpx.Client(verify=combined.name)
+        http_async_client = httpx.AsyncClient(verify=combined.name)
+    else:
+        http_client = None
+        http_async_client = None
+
     # Import here after checking API key to avoid slow import on error
     from google import genai
     from google.genai import types
     from PIL import Image as PILImage
 
     # Initialise client
-    client = genai.Client(api_key=api_key)
+    client_kwargs = {"api_key": api_key}
+    if http_client:
+        client_kwargs["http_client"] = http_client
+        client_kwargs["http_async_client"] = http_async_client
+    client = genai.Client(**client_kwargs)
 
     # Set up output path
     output_path = Path(args.filename)
