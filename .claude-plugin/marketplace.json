@@ -5,29 +5,9 @@
   },
   "plugins": [
     {
-      "name": "better-compact",
-      "source": "./better-compact",
-      "description": "A compaction tool that's better than the built in one. Supports full or tail compaction"
-    },
-    {
       "name": "split-commit",
       "source": "./split-commit",
       "description": "Splits the HEAD commit into a sequence of smaller commits"
-    },
-    {
-      "name": "convex-chef",
-      "source": "./convex-chef",
-      "description": "Convex backend development guidelines with proactive code review, extracted from Chef"
-    },
-    {
-      "name": "codex-consultant",
-      "source": "./codex-consultant",
-      "description": "Consult OpenAI Codex CLI for second opinions on code review, architecture analysis, debugging, and technical research"
-    },
-    {
-      "name": "amp-consultant",
-      "source": "./amp-consultant",
-      "description": "Consult Sourcegraph Amp CLI for second opinions on code review, architecture analysis, debugging, and technical research"
     },
     {
       "name": "react",
