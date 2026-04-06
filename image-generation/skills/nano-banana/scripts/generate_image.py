@@ -4,8 +4,6 @@
 # dependencies = [
 #     "google-genai>=1.0.0",
 #     "pillow>=10.0.0",
-#     "certifi>=2024.0.0",
-#     "httpx>=0.27.0",
 # ]
 # ///
 """
@@ -67,22 +65,6 @@ def main():
         print("  1. Provide --api-key argument", file=sys.stderr)
         print("  2. Set GEMINI_API_KEY environment variable", file=sys.stderr)
         sys.exit(1)
-
-    # If running under a TLS proxy (e.g. sfw), SSL_CERT_FILE points to only the
-    # proxy's CA cert. Merge it with certifi's full bundle so all HTTPS calls trust
-    # both the proxy and real CAs.
-    ssl_cert_file = os.environ.get("SSL_CERT_FILE")
-    if ssl_cert_file and Path(ssl_cert_file).exists():
-        import certifi
-        import tempfile
-        combined = tempfile.NamedTemporaryFile(suffix=".pem", delete=False, mode="wb")
-        with open(certifi.where(), "rb") as f:
-            combined.write(f.read())
-        with open(ssl_cert_file, "rb") as f:
-            combined.write(f.read())
-        combined.close()
-        os.environ["SSL_CERT_FILE"] = combined.name
-        os.environ["REQUESTS_CA_BUNDLE"] = combined.name
 
     # Import here after checking API key to avoid slow import on error
     from google import genai
