@@ -1,0 +1,9 @@
+{
+  "name": "no-mistakes",
+  "description": "Multi-step pre-merge pipeline (rebase, review, test, document, lint, push, PR, CI) with auto-fix loops and human approval gates",
+  "version": "0.1.0",
+  "author": {
+    "name": "Kevin Wu Won"
+  },
+  "keywords": ["pre-merge", "review", "ci", "pull-request", "git", "pipeline"]
+}

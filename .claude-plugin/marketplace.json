@@ -23,6 +23,11 @@
       "name": "image-generation",
       "source": "./image-generation",
       "description": "Generate and edit images using Nano Banana (Gemini CLI). Handles blog images, thumbnails, icons, diagrams, and visual assets."
+    },
+    {
+      "name": "no-mistakes",
+      "source": "./no-mistakes",
+      "description": "Multi-step pre-merge pipeline (rebase, review, test, document, lint, push, PR, CI) with auto-fix loops and human approval gates. Ported from kunchenguid/no-mistakes."
     }
   ]
 }
